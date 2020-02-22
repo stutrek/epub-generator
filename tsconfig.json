@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "umd",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "moduleResolution": "node",
+        "outDir": "./dist",
+        "target": "es3",
+        "lib": ["es6", "dom", "esnext"],
+        "declaration": true,
+        "esModuleInterop": true,
+        "downlevelIteration": true
+    },
+    "files": ["./src/index.ts"]
+}
