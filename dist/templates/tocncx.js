@@ -1,17 +1,8 @@
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports"], factory);
-    }
-})(function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    function tocNcxTemplate(config, chapters) {
-        let playOrder = 0;
-        return `<?xml version="1.0" encoding="UTF-8"?>
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function tocNcxTemplate(config, chapters) {
+    let playOrder = 0;
+    return `<?xml version="1.0" encoding="UTF-8"?>
 <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
     <head>
         <meta name="dtb:uid" content="${config.uuid}" />
@@ -24,24 +15,24 @@
         <text>${config.title}</text>
 	</docTitle>
 	${config.authors.length
-            ? `
+        ? `
     <docAuthor>
         <text>${config.authors.join(', ')}</text>
 	</docAuthor>
 	`
-            : ''}
+        : ''}
     <navMap>
 		${chapters.map((chapter, index) => {
-            if (chapter.beforeToc && chapter.excludeFromToc === false) {
-                return `
+        if (chapter.beforeToc && chapter.excludeFromToc === false) {
+            return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
                         <text>${1 + index}. ${chapter.title || 'Chapter ' + (1 + index)}</text>
                     </navLabel>
                     <content src="./OEBPS/${chapter.filename}>"/>
                 </navPoint>`;
-            }
-        })}
+        }
+    })}
 
         <navPoint id="toc" playOrder="${playOrder++}" class="chapter">
             <navLabel>
@@ -50,19 +41,18 @@
             <content src="./OEBPS/toc.xhtml"/>
         </navPoint>
 		${chapters.map((chapter, index) => {
-            if (chapter.beforeToc === false && chapter.excludeFromToc === false) {
-                return `
+        if (chapter.beforeToc === false && chapter.excludeFromToc === false) {
+            return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
                         <text>${1 + index}. ${chapter.title || 'Chapter ' + (1 + index)}</text>
                     </navLabel>
                     <content src="./OEBPS/${chapter.filename}"/>
                 </navPoint>`;
-            }
-        })}
+        }
+    })}
     </navMap>
 </ncx>`;
-    }
-    exports.default = tocNcxTemplate;
-});
+}
+exports.default = tocNcxTemplate;
 //# sourceMappingURL=tocncx.js.map
