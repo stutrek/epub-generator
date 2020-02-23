@@ -16,13 +16,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "node-html-parser", "entities", "diacritics", "./loadImages", "./allowedAttributesAndTags", "./templates/stylescss", "./templates/chapterhtml", "./templates/containerxml", "./templates/contentopf", "./templates/tochtml", "./templates/tocncx"], factory);
+        define(["require", "exports", "node-html-parser", "diacritics", "./loadImages", "./allowedAttributesAndTags", "./templates/stylescss", "./templates/chapterhtml", "./templates/containerxml", "./templates/contentopf", "./templates/tochtml", "./templates/tocncx"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const node_html_parser_1 = require("node-html-parser");
-    const entities_1 = require("entities");
     const diacritics_1 = require("diacritics");
     const loadImages_1 = __importDefault(require("./loadImages"));
     const allowedAttributesAndTags_1 = require("./allowedAttributesAndTags");
@@ -46,25 +45,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 `;
         }
     };
-    const createChapterHtml = (htmlFragment, chapter, options) => {
-        const injectTitle = options.title && options.injectChapterTitles;
-        const injectAuthor = injectTitle && chapter.authors.length;
-        const injectLink = injectTitle && chapter.url;
-        return `${getHeader(options.version || 3, options.lang)}
-		<head>
-		<meta charset="UTF-8" />
-		<title>${entities_1.encodeXML(options.title || '')}</title>
-			<link rel="stylesheet" type="text/css" href="style.css" />
-		</head>
-		<body>
-			${injectTitle ? `<h1>${entities_1.encodeXML(chapter.title)}</h1>` : ''}
-			${injectAuthor ? `<div class="epub-author">${entities_1.encodeXML(chapter.authors.join(', '))}</div>` : ''}
-			${injectLink ? `<div class="epub-link"><a href="${chapter.url}">View on}</a></div>` : ''}
-			${htmlFragment}
-		</body>
-		</html>
-		`;
-    };
     function createEpub(options) {
         return __awaiter(this, void 0, void 0, function* () {
             const images = new Map();
@@ -75,7 +55,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             const resolvedChapters = options.content.map(function (content, index) {
                 const slug = diacritics_1.remove(content.title || 'no title').replace(/\W/g, '-');
-                let root = node_html_parser_1.parse(content.data, {
+                const unAmpersandedHtml = content.data.replace(/&([^;]*)(\s|$)/g, '&amp;$1$2');
+                let root = node_html_parser_1.parse(unAmpersandedHtml, {
                     lowerCaseTagName: true,
                 });
                 if (root instanceof node_html_parser_1.HTMLElement) {
@@ -83,7 +64,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         root = root.querySelector('body');
                         root.tagName = 'div';
                     }
-                    const elements = root.querySelectorAll('*');
                     const imageElements = root.querySelectorAll('img');
                     for (const image of imageElements) {
                         let url = image.getAttribute('src');
@@ -91,7 +71,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             continue;
                         }
                         if (image.hasAttribute('width') && Number(image.getAttribute('width')) < 5) {
-                            console.log(image.parentNode);
                             const remover = image.parentNode || root;
                             remover.removeChild(image);
                             continue;
@@ -110,6 +89,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         }
                         image.removeAttribute('srcset');
                     }
+                    const elements = root.querySelectorAll('*');
                     for (const element of elements) {
                         for (const attr in element.attributes) {
                             if (allowedAttributesAndTags_1.allowedAttributes.has(attr) === false) {
@@ -123,7 +103,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 return {
                     title: content.title,
-                    filename: `${'index'.padStart(3, '0')}_${slug}.xhtml`,
+                    filename: `${`${index}`.padStart(3, '0')}_${slug}.xhtml`,
                     excludeFromToc: !!content.excludeFromToc,
                     beforeToc: content.beforeToc === true,
                     authors: content.authors,

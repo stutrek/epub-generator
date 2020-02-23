@@ -5,7 +5,7 @@ import { remove as removeDiacritics } from 'diacritics';
 
 import loadImages from './loadImages';
 import { allowedAttributes, allowedXhtml11Tags } from './allowedAttributesAndTags';
-import { EPubOptions, ChapterInput, ResolvedChapter } from './types';
+import { EPubOptions, ResolvedChapter } from './types';
 
 import styleSheet from './templates/stylescss';
 import chapterHtml from './templates/chapterhtml';
@@ -28,26 +28,6 @@ const getHeader = (version: 2 | 3, lang: string) => {
     }
 };
 
-const createChapterHtml = (htmlFragment: string, chapter: ChapterInput, options: EPubOptions) => {
-    const injectTitle = options.title && options.injectChapterTitles;
-    const injectAuthor = injectTitle && chapter.authors.length;
-    const injectLink = injectTitle && chapter.url;
-    return /*html */ `${getHeader(options.version || 3, options.lang)}
-		<head>
-		<meta charset="UTF-8" />
-		<title>${encodeXML(options.title || '')}</title>
-			<link rel="stylesheet" type="text/css" href="style.css" />
-		</head>
-		<body>
-			${injectTitle ? `<h1>${encodeXML(chapter.title)}</h1>` : ''}
-			${injectAuthor ? `<div class="epub-author">${encodeXML(chapter.authors.join(', '))}</div>` : ''}
-			${injectLink ? `<div class="epub-link"><a href="${chapter.url}">View on}</a></div>` : ''}
-			${htmlFragment}
-		</body>
-		</html>
-		`;
-};
-
 export default async function createEpub(options: EPubOptions) {
     const images = new Map<string, string>();
     let imageCount = 1;
@@ -60,6 +40,8 @@ export default async function createEpub(options: EPubOptions) {
     const resolvedChapters: ResolvedChapter[] = options.content.map(function(content, index) {
         const slug = removeDiacritics(content.title || 'no title').replace(/\W/g, '-');
 
+        const unAmpersandedHtml = content.data.replace(/&([^;]*)(\s|$)/g, '&amp;$1$2');
+
         let root:
             | (TextNode & {
                   valid: boolean;
@@ -69,7 +51,7 @@ export default async function createEpub(options: EPubOptions) {
                         valid: boolean;
                     })
                   | HTMLElement
-              ) = parse(content.data, {
+              ) = parse(unAmpersandedHtml, {
             lowerCaseTagName: true,
         });
 
@@ -78,8 +60,6 @@ export default async function createEpub(options: EPubOptions) {
                 root = root.querySelector('body');
                 root.tagName = 'div';
             }
-
-            const elements = root.querySelectorAll('*');
 
             const imageElements = root.querySelectorAll('img');
 
@@ -90,9 +70,8 @@ export default async function createEpub(options: EPubOptions) {
                 }
 
                 if (image.hasAttribute('width') && Number(image.getAttribute('width')) < 5) {
-                    console.log(image.parentNode);
                     const remover = image.parentNode || root;
-                    // @ts-ignore does so exist
+                    // @ts-ignore it does exist
                     remover.removeChild(image);
                     continue;
                 }
@@ -114,6 +93,7 @@ export default async function createEpub(options: EPubOptions) {
                 image.removeAttribute('srcset');
             }
 
+            const elements = root.querySelectorAll('*');
             for (const element of elements) {
                 for (const attr in element.attributes) {
                     if (allowedAttributes.has(attr) === false) {
@@ -128,7 +108,7 @@ export default async function createEpub(options: EPubOptions) {
 
         return {
             title: content.title,
-            filename: `${'index'.padStart(3, '0')}_${slug}.xhtml`,
+            filename: `${`${index}`.padStart(3, '0')}_${slug}.xhtml`,
             excludeFromToc: !!content.excludeFromToc,
             beforeToc: content.beforeToc === true,
             authors: content.authors,
