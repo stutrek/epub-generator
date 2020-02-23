@@ -1,9 +1,7 @@
 import { parse, TextNode, HTMLElement } from 'node-html-parser';
-import { encodeXML } from 'entities';
 
 import { remove as removeDiacritics } from 'diacritics';
 
-import loadImages from './loadImages';
 import { allowedAttributes, allowedXhtml11Tags } from './allowedAttributesAndTags';
 import { EPubOptions, ResolvedChapter } from './types';
 
@@ -28,7 +26,9 @@ const getHeader = (version: 2 | 3, lang: string) => {
     }
 };
 
-export default async function createEpub(options: EPubOptions) {
+type ImageLoader = (files: Map<string, string>) => Promise<Map<string, ArrayBuffer>>;
+
+export default async function createEpub(options: EPubOptions, loadImages: ImageLoader) {
     const images = new Map<string, string>();
     let imageCount = 1;
 

@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_html_parser_1 = require("node-html-parser");
 const diacritics_1 = require("diacritics");
-const loadImages_1 = __importDefault(require("./loadImages"));
 const allowedAttributesAndTags_1 = require("./allowedAttributesAndTags");
 const stylescss_1 = __importDefault(require("./templates/stylescss"));
 const chapterhtml_1 = __importDefault(require("./templates/chapterhtml"));
@@ -36,7 +35,7 @@ const getHeader = (version, lang) => {
 `;
     }
 };
-function createEpub(options) {
+function createEpub(options, loadImages) {
     return __awaiter(this, void 0, void 0, function* () {
         const images = new Map();
         let imageCount = 1;
@@ -102,7 +101,7 @@ function createEpub(options) {
                 url: content.url,
             };
         });
-        const imagesPromise = loadImages_1.default(images);
+        const imagesPromise = loadImages(images);
         const files = new Map();
         files.set('/META-INF/container.xml', containerxml_1.default);
         files.set('/OEBPS/style.css', stylescss_1.default);

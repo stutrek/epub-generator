@@ -2,11 +2,12 @@ import JSZip, { JSZipGeneratorOptions } from 'jszip';
 
 import generateMapOfFiles from './generateMapOfFiles';
 import { EPubOptions } from './types';
+import loadImages from './loadImages';
 
 export const generateMapOfContents = generateMapOfFiles;
 
 export const createEpub = async (epubConfig: EPubOptions, zipConfig: JSZipGeneratorOptions) => {
-    const files = await generateMapOfContents(epubConfig);
+    const files = await generateMapOfContents(epubConfig, loadImages);
     const zip = new JSZip();
 
     for (const [filename, contents] of files) {
