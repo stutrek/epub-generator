@@ -1,6 +1,6 @@
 import JSZip, { JSZipGeneratorOptions } from 'jszip';
 
-import generateMapOfFiles from './generateMapOfFiles';
+import generateMapOfFiles from './generateFiles';
 import { EPubOptions } from './types';
 import loadImages from './loadImages';
 
