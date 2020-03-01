@@ -1,4 +1,5 @@
 import { EPubOptions, ResolvedChapter } from '../types';
+import { encodeXML } from 'entities';
 
 export default function tocNcxTemplate(config: EPubOptions, chapters: ResolvedChapter[]) {
     let playOrder = 0;
@@ -12,13 +13,13 @@ export default function tocNcxTemplate(config: EPubOptions, chapters: ResolvedCh
         <meta name="dtb:maxPageNumber" content="0"/>
     </head>
     <docTitle>
-        <text>${config.title}</text>
+        <text>${encodeXML(config.title)}</text>
 	</docTitle>
 	${
         config.authors.length
             ? `
     <docAuthor>
-        <text>${config.authors.join(', ')}</text>
+        <text>${encodeXML(config.authors.join(', '))}</text>
 	</docAuthor>
 	`
             : ''
@@ -29,9 +30,10 @@ export default function tocNcxTemplate(config: EPubOptions, chapters: ResolvedCh
                 return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
-                        <text>${1 + index}. ${chapter.title || 'Chapter ' + (1 + index)}</text>
+                        <text>${1 + index}. ${encodeXML(chapter.title) ||
+                    'Chapter ' + (1 + index)}</text>
                     </navLabel>
-                    <content src="./OEBPS/${chapter.filename}>"/>
+                    <content src="./${chapter.filename}>"/>
                 </navPoint>`;
             }
         })}
@@ -40,16 +42,17 @@ export default function tocNcxTemplate(config: EPubOptions, chapters: ResolvedCh
             <navLabel>
                 <text>Table of Contents</text>
             </navLabel>
-            <content src="./OEBPS/toc.xhtml"/>
+            <content src="./toc.xhtml"/>
         </navPoint>
 		${chapters.map((chapter, index) => {
             if (chapter.beforeToc === false && chapter.excludeFromToc === false) {
                 return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
-                        <text>${1 + index}. ${chapter.title || 'Chapter ' + (1 + index)}</text>
+                        <text>${1 + index}. ${encodeXML(chapter.title) ||
+                    'Chapter ' + (1 + index)}</text>
                     </navLabel>
-                    <content src="./OEBPS/${chapter.filename}"/>
+                    <content src="./${chapter.filename}"/>
                 </navPoint>`;
             }
         })}

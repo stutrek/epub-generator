@@ -6,7 +6,7 @@
     "author": "Stu Kabakoff <stutrek@gmail.com>",
     "license": "MIT",
     "scripts": {
-        "build": "tsc"
+        "build": "rm -rf ./dist; tsc"
     },
     "files": [
         "dist"

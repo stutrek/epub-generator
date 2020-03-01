@@ -1,4 +1,5 @@
 import { EPubOptions, ResolvedChapter } from '../types';
+import { encodeXML } from 'entities';
 
 const imageMime = (filename: string) => {
     const ending = filename.split('.').pop();
@@ -23,42 +24,42 @@ export default function contentOpfTemplate(
     <metadata xmlns:dc="http://purl.org/dc/elements/1.1/"
               xmlns:opf="http://www.idpf.org/2007/opf">
 
-        <dc:identifier id="BookId">${options.uuid}</dc:identifier>
+        <dc:identifier id="BookId">${encodeXML(options.uuid)}</dc:identifier>
         <meta refines="#BookId" property="identifier-type" scheme="onix:codelist5">22</meta>
         <meta property="dcterms:identifier" id="meta-identifier">BookId</meta>
-        <dc:title>${options.title}</dc:title>
-        <meta property="dcterms:title" id="meta-title">${options.title}</meta>
-        <dc:language>${options.lang}</dc:language>
-        <meta property="dcterms:language" id="meta-language">${options.lang}</meta>
-		<meta property="dcterms:modified">${options.date}</meta>
+        <dc:title>${encodeXML(options.title)}</dc:title>
+        <meta property="dcterms:title" id="meta-title">${encodeXML(options.title)}</meta>
+        <dc:language>${encodeXML(options.lang)}</dc:language>
+        <meta property="dcterms:language" id="meta-language">${encodeXML(options.lang)}</meta>
+		<meta property="dcterms:modified">${encodeXML(options.date)}</meta>
 		${
             options.authors.length
                 ? `
-		<dc:creator id="creator">${options.authors.join(', ')}</dc:creator>
-        <meta refines="#creator" property="file-as">${options.authors.join(', ')}</meta>`
+		<dc:creator id="creator">${encodeXML(options.authors.join(', '))}</dc:creator>
+        <meta refines="#creator" property="file-as">${encodeXML(options.authors.join(', '))}</meta>`
                 : ''
         }
         ${
-            options.publisher
+            encodeXML(options.publisher)
                 ? `
-		<meta property="dcterms:publisher">${options.publisher}</meta>
-        <dc:publisher>${options.publisher}</dc:publisher>`
+		<meta property="dcterms:publisher">${encodeXML(options.publisher)}</meta>
+        <dc:publisher>${encodeXML(options.publisher)}</dc:publisher>`
                 : ''
         }
         
-        <meta property="dcterms:date">${options.date}</meta>
-        <dc:date>${options.date}</dc:date>
+        <meta property="dcterms:date">${encodeXML(options.date)}</meta>
+        <dc:date>${encodeXML(options.date)}</dc:date>
         <meta property="dcterms:rights">All rights reserved</meta>
-        <dc:rights>${options.copyright}</dc:rights>
+        <dc:rights>${encodeXML(options.copyright)}</dc:rights>
         <meta name="cover" content="image_cover"/>
         <meta name="generator" content="epub-gen" />
 
     </metadata>
 
     <manifest>
-        <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
-        <item id="toc" href="toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-		<item id="css" href="style.css" media-type="text/css" />
+        <item id="ncx" href="./toc.ncx" media-type="application/x-dtbncx+xml" />
+        <item id="toc" href="./toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+		<item id="css" href="./style.css" media-type="text/css" />
 		${Array.from(images.values()).map(
             filename =>
                 `<item href="./images/${filename}" id="${filename.replace(

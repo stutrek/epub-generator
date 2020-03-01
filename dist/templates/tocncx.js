@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const entities_1 = require("entities");
 function tocNcxTemplate(config, chapters) {
     let playOrder = 0;
     return `<?xml version="1.0" encoding="UTF-8"?>
@@ -12,12 +13,12 @@ function tocNcxTemplate(config, chapters) {
         <meta name="dtb:maxPageNumber" content="0"/>
     </head>
     <docTitle>
-        <text>${config.title}</text>
+        <text>${entities_1.encodeXML(config.title)}</text>
 	</docTitle>
 	${config.authors.length
         ? `
     <docAuthor>
-        <text>${config.authors.join(', ')}</text>
+        <text>${entities_1.encodeXML(config.authors.join(', '))}</text>
 	</docAuthor>
 	`
         : ''}
@@ -27,9 +28,10 @@ function tocNcxTemplate(config, chapters) {
             return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
-                        <text>${1 + index}. ${chapter.title || 'Chapter ' + (1 + index)}</text>
+                        <text>${1 + index}. ${entities_1.encodeXML(chapter.title) ||
+                'Chapter ' + (1 + index)}</text>
                     </navLabel>
-                    <content src="./OEBPS/${chapter.filename}>"/>
+                    <content src="./${chapter.filename}>"/>
                 </navPoint>`;
         }
     })}
@@ -38,16 +40,17 @@ function tocNcxTemplate(config, chapters) {
             <navLabel>
                 <text>Table of Contents</text>
             </navLabel>
-            <content src="./OEBPS/toc.xhtml"/>
+            <content src="./toc.xhtml"/>
         </navPoint>
 		${chapters.map((chapter, index) => {
         if (chapter.beforeToc === false && chapter.excludeFromToc === false) {
             return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
-                        <text>${1 + index}. ${chapter.title || 'Chapter ' + (1 + index)}</text>
+                        <text>${1 + index}. ${entities_1.encodeXML(chapter.title) ||
+                'Chapter ' + (1 + index)}</text>
                     </navLabel>
-                    <content src="./OEBPS/${chapter.filename}"/>
+                    <content src="./${chapter.filename}"/>
                 </navPoint>`;
         }
     })}
