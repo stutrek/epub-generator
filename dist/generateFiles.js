@@ -71,6 +71,11 @@ async function createEpub(options, loadImages) {
             }
             const elements = root.querySelectorAll('*');
             for (const element of elements) {
+                if (element.tagName === 'iframe') {
+                    const remover = element.parentNode || root;
+                    remover.removeChild(image);
+                    continue;
+                }
                 for (const attr in element.attributes) {
                     if (allowedAttributesAndTags_1.allowedAttributes.has(attr) === false) {
                         element.removeAttribute(attr);
