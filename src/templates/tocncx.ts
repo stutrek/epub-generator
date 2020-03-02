@@ -1,5 +1,9 @@
 import { EPubOptions, ResolvedChapter } from '../types';
-import { encodeXML } from 'entities';
+import { encodeXML as unsafeEncodeXML } from 'entities';
+
+const encodeXML = (str: string) => {
+    return unsafeEncodeXML(str || '');
+};
 
 export default function tocNcxTemplate(config: EPubOptions, chapters: ResolvedChapter[]) {
     let playOrder = 0;

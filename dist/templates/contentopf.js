@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const entities_1 = require("entities");
+const encodeXML = (str) => {
+    return entities_1.encodeXML(str || '');
+};
 const imageMime = (filename) => {
     const ending = filename.split('.').pop();
     return `image/${ending}`;
@@ -19,29 +22,29 @@ function contentOpfTemplate(options, chapters, images) {
     <metadata xmlns:dc="http://purl.org/dc/elements/1.1/"
               xmlns:opf="http://www.idpf.org/2007/opf">
 
-        <dc:identifier id="BookId">${entities_1.encodeXML(options.uuid)}</dc:identifier>
+        <dc:identifier id="BookId">${encodeXML(options.uuid)}</dc:identifier>
         <meta refines="#BookId" property="identifier-type" scheme="onix:codelist5">22</meta>
         <meta property="dcterms:identifier" id="meta-identifier">BookId</meta>
-        <dc:title>${entities_1.encodeXML(options.title)}</dc:title>
-        <meta property="dcterms:title" id="meta-title">${entities_1.encodeXML(options.title)}</meta>
-        <dc:language>${entities_1.encodeXML(options.lang)}</dc:language>
-        <meta property="dcterms:language" id="meta-language">${entities_1.encodeXML(options.lang)}</meta>
-		<meta property="dcterms:modified">${entities_1.encodeXML(options.date)}</meta>
+        <dc:title>${encodeXML(options.title)}</dc:title>
+        <meta property="dcterms:title" id="meta-title">${encodeXML(options.title)}</meta>
+        <dc:language>${encodeXML(options.lang)}</dc:language>
+        <meta property="dcterms:language" id="meta-language">${encodeXML(options.lang)}</meta>
+		<meta property="dcterms:modified">${encodeXML(options.date)}</meta>
 		${options.authors.length
         ? `
-		<dc:creator id="creator">${entities_1.encodeXML(options.authors.join(', '))}</dc:creator>
-        <meta refines="#creator" property="file-as">${entities_1.encodeXML(options.authors.join(', '))}</meta>`
+		<dc:creator id="creator">${encodeXML(options.authors.join(', '))}</dc:creator>
+        <meta refines="#creator" property="file-as">${encodeXML(options.authors.join(', '))}</meta>`
         : ''}
-        ${entities_1.encodeXML(options.publisher)
+        ${encodeXML(options.publisher)
         ? `
-		<meta property="dcterms:publisher">${entities_1.encodeXML(options.publisher)}</meta>
-        <dc:publisher>${entities_1.encodeXML(options.publisher)}</dc:publisher>`
+		<meta property="dcterms:publisher">${encodeXML(options.publisher)}</meta>
+        <dc:publisher>${encodeXML(options.publisher)}</dc:publisher>`
         : ''}
         
-        <meta property="dcterms:date">${entities_1.encodeXML(options.date)}</meta>
-        <dc:date>${entities_1.encodeXML(options.date)}</dc:date>
+        <meta property="dcterms:date">${encodeXML(options.date)}</meta>
+        <dc:date>${encodeXML(options.date)}</dc:date>
         <meta property="dcterms:rights">All rights reserved</meta>
-        <dc:rights>${entities_1.encodeXML(options.copyright)}</dc:rights>
+        <dc:rights>${encodeXML(options.copyright)}</dc:rights>
         <meta name="cover" content="image_cover"/>
         <meta name="generator" content="epub-gen" />
 

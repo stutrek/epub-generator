@@ -1,5 +1,10 @@
 import { ResolvedChapter, EPubOptions } from '../types';
-import { encodeXML } from 'entities';
+import { encodeXML as unsafeEncodeXML } from 'entities';
+
+const encodeXML = (str: string) => {
+    return unsafeEncodeXML(str || '');
+};
+
 export default function tocHtmlTemplate(options: EPubOptions, chapters: ResolvedChapter[]) {
     return /*html*/ `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>

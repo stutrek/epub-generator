@@ -55,7 +55,7 @@ export async function generateEpubs() {
                 type: 'nodebuffer',
             });
             const filePath = `${__dirname}/generatedFiles/${article.id
-                ?.replace(/\W/g, '_')
+                .replace(/\W/g, '_')
                 .replace(/^https?_+/, '')}.epub`;
             writeFileSync(filePath, book);
         }

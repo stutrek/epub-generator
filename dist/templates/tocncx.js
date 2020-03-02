@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const entities_1 = require("entities");
+const encodeXML = (str) => {
+    return entities_1.encodeXML(str || '');
+};
 function tocNcxTemplate(config, chapters) {
     let playOrder = 0;
     return `<?xml version="1.0" encoding="UTF-8"?>
@@ -13,12 +16,12 @@ function tocNcxTemplate(config, chapters) {
         <meta name="dtb:maxPageNumber" content="0"/>
     </head>
     <docTitle>
-        <text>${entities_1.encodeXML(config.title)}</text>
+        <text>${encodeXML(config.title)}</text>
 	</docTitle>
 	${config.authors.length
         ? `
     <docAuthor>
-        <text>${entities_1.encodeXML(config.authors.join(', '))}</text>
+        <text>${encodeXML(config.authors.join(', '))}</text>
 	</docAuthor>
 	`
         : ''}
@@ -28,7 +31,7 @@ function tocNcxTemplate(config, chapters) {
             return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
-                        <text>${1 + index}. ${entities_1.encodeXML(chapter.title) ||
+                        <text>${1 + index}. ${encodeXML(chapter.title) ||
                 'Chapter ' + (1 + index)}</text>
                     </navLabel>
                     <content src="./${chapter.filename}>"/>
@@ -48,7 +51,7 @@ function tocNcxTemplate(config, chapters) {
             return `
 				<navPoint id="content_${index}" playOrder="${playOrder++}" class="chapter">
                     <navLabel>
-                        <text>${1 + index}. ${entities_1.encodeXML(chapter.title) ||
+                        <text>${1 + index}. ${encodeXML(chapter.title) ||
                 'Chapter ' + (1 + index)}</text>
                     </navLabel>
                     <content src="./${chapter.filename}"/>

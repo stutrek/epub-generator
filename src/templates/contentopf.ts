@@ -1,5 +1,9 @@
 import { EPubOptions, ResolvedChapter } from '../types';
-import { encodeXML } from 'entities';
+import { encodeXML as unsafeEncodeXML } from 'entities';
+
+const encodeXML = (str: string) => {
+    return unsafeEncodeXML(str || '');
+};
 
 const imageMime = (filename: string) => {
     const ending = filename.split('.').pop();
