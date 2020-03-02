@@ -39,42 +39,46 @@ async function createEpub(options, loadImages) {
         let root = node_html_parser_1.parse(unAmpersandedHtml, {
             lowerCaseTagName: true,
         });
+        const elements = [];
+        const fillElements = (parent) => {
+            parent.childNodes.forEach(node => {
+                if (node instanceof node_html_parser_1.HTMLElement) {
+                    elements.push(node);
+                    fillElements(node);
+                }
+            });
+        };
         if (root instanceof node_html_parser_1.HTMLElement) {
             if (root.querySelector('body')) {
                 root = root.querySelector('body');
                 root.tagName = 'div';
             }
-            const imageElements = root.querySelectorAll('img');
-            for (const image of imageElements) {
-                let url = image.getAttribute('src');
-                if (url.startsWith('http') === false) {
-                    continue;
-                }
-                if (image.hasAttribute('width') && Number(image.getAttribute('width')) < 5) {
-                    const remover = image.parentNode || root;
-                    remover.removeChild(image);
-                    continue;
-                }
-                if (images.has(url) === false) {
-                    const extension = url
-                        .replace(/[?#].*/, '')
-                        .split('.')
-                        .pop();
-                    images.set(url, `image_${imageCount}.${extension}`);
-                    imageCount += 1;
-                }
-                image.setAttribute('src', `./images/${images.get(url)}`);
-                if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
-                    image.setAttribute('alt', 'alt');
-                }
-                image.removeAttribute('srcset');
-            }
-            const elements = root.querySelectorAll('*');
+            fillElements(root);
             for (const element of elements) {
-                if (element.tagName === 'iframe') {
+                if (element.tagName === 'iframe' ||
+                    (element.hasAttribute('width') && Number(element.getAttribute('width')) < 5)) {
                     const remover = element.parentNode || root;
                     remover.removeChild(element);
                     continue;
+                }
+                if (element.tagName === 'img') {
+                    const image = element;
+                    let url = image.getAttribute('src');
+                    if (url.startsWith('http')) {
+                        if (images.has(url) === false) {
+                            const extension = url
+                                .replace(/[?#].*/, '')
+                                .split('.')
+                                .pop();
+                            images.set(url, `image_${imageCount}.${extension}`);
+                            imageCount += 1;
+                        }
+                        image.setAttribute('src', `./images/${images.get(url)}`);
+                        if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
+                            image.setAttribute('alt', 'alt');
+                        }
+                        image.removeAttribute('srcset');
+                    }
                 }
                 for (const attr in element.attributes) {
                     if (allowedAttributesAndTags_1.allowedAttributes.has(attr) === false ||

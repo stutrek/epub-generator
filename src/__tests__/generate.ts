@@ -6,8 +6,7 @@ import { writeFileSync } from 'fs';
 
 import { createEpub } from '../index';
 import testFeed from './testFeed';
-
-const feedUrls = ['https://theconversation.com/us/technology/articles.atom'];
+import testRss from './testRss';
 
 export async function generateEpubs() {
     // const feeds = await Promise.all(
@@ -20,7 +19,10 @@ export async function generateEpubs() {
     // );
     // console.log('loaded');
 
-    const feeds = await Promise.all([parse(testFeed)]);
+    const feeds = await Promise.all([
+        // parse(testFeed),
+        parse(testRss),
+    ]);
 
     const promises: Promise<any>[] = [];
     for (const feed of feeds) {
