@@ -1,4 +1,4 @@
-export default `<?xml version="1.0" encoding="UTF-8"?>
+export default /* html */ `<?xml version="1.0" encoding="UTF-8"?>
 <feed xml:lang="en-US" xmlns="http://www.w3.org/2005/Atom" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
   <id>tag:theconversation.com,2011:/us/technology/articles</id>
   <link rel="alternate" type="text/html" href="https://theconversation.com"/>
@@ -19,11 +19,15 @@ export default `<?xml version="1.0" encoding="UTF-8"?>
 
 &lt;p&gt;While the prospects look bleak, the recent revolution in artificial intelligence (AI) offers new hope. In a study published on Feb. 20 in the journal Cell, scientists from MIT and Harvard &lt;a href="https://doi.org/10.1016/j.cell.2020.01.021"&gt;used a type of AI called deep learning to discover new antibiotics&lt;/a&gt;.&lt;/p&gt;
 
+&lt;div class="wrapper"&lt;iframe style="display:block" type="text/html" width="640" height="360" src="https://www.youtube.com/embed/M9vp9lhZiqU?start=0&wmode=transparent" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;&lt;/div&gt;
+
 &lt;p&gt;The traditional way of discovering antibiotics – from soil or plant extracts – has not revealed new candidates, and there are many &lt;a href="https://wellcome.ac.uk/news/why-is-it-so-hard-develop-new-antibiotics"&gt;social and economic hurdles&lt;/a&gt; to solving this problem, as well. Some scientists have recently tried to tackle it by searching the DNA of bacteria for new &lt;a href="https://doi.org/10.1038/s41586-020-1990-9"&gt;antibiotic-producing genes&lt;/a&gt;. Others are looking for antibiotics in exotic locations such as &lt;a href="https://www.sciencemag.org/news/2016/07/new-antibiotic-found-human-nose"&gt;in our noses&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Drugs found through such unconventional methods face a rocky road to reach the market. The drugs that are effective in a petri dish may not work well inside the body. They may not be absorbed well or may have side effects. Manufacturing these drugs in large quantities is also a significant challenge. &lt;/p&gt;
 
-&lt;h2&gt;Deep learning&lt;/h2&gt;
+&lt;h2 fakeAttr="should be removed"&gt;Deep learning&lt;/h2&gt;
+
+&lt;iframe&gt;this should be removed&lt;/iframe&gt;
 
 &lt;p&gt;Enter deep learning. These algorithms power many of today’s facial recognition systems and self-driving cars. They mimic how neurons in our brains operate by learning patterns in data. An individual artificial neuron – like a mini sensor – might detect simple patterns like lines or circles. By using thousands of these artificial neurons, deep learning AI can perform extremely complex tasks like recognizing cats in videos or detecting tumors in &lt;a href="https://www.newscientist.com/article/2229306-ai-matches-humans-at-diagnosing-brain-cancer-from-tumour-biopsy-images/"&gt;biopsy images&lt;/a&gt;. &lt;/p&gt;
 

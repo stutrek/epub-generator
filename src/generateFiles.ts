@@ -98,11 +98,14 @@ export default async function createEpub(options: EPubOptions, loadImages: Image
                 if (element.tagName === 'iframe') {
                     const remover = element.parentNode || root;
                     // @ts-ignore it does exist
-                    remover.removeChild(image);
+                    remover.removeChild(element);
                     continue;
                 }
                 for (const attr in element.attributes) {
-                    if (allowedAttributes.has(attr) === false) {
+                    if (
+                        allowedAttributes.has(attr) === false ||
+                        (attr === 'src' && element.tagName !== 'img')
+                    ) {
                         element.removeAttribute(attr);
                     }
                 }
