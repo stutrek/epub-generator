@@ -1,5 +1,5 @@
 import { ResolvedChapter, EPubOptions } from '../types';
-
+import { encodeXML } from 'entities';
 export default function tocHtmlTemplate(options: EPubOptions, chapters: ResolvedChapter[]) {
     return /*html*/ `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -19,10 +19,12 @@ export default function tocHtmlTemplate(options: EPubOptions, chapters: Resolved
             if (chapter.beforeToc && chapter.excludeFromToc === false) {
                 return `
 				<li class="table-of-contents">
-                    <a href="./${chapter.filename}">${chapter.title ||
+                    <a href="./${chapter.filename}">${encodeXML(chapter.title) ||
                     'Chapter ' + (1 + index)}</a>${
                     chapter.authors.length
-                        ? `<br/><small class="toc-author">${chapter.authors.join(', ')}</small>`
+                        ? `<br/><small class="toc-author">${encodeXML(
+                              chapter.authors.join(', ')
+                          )}</small>`
                         : ''
                 }
                 </li>`;
@@ -32,10 +34,12 @@ export default function tocHtmlTemplate(options: EPubOptions, chapters: Resolved
             if (chapter.beforeToc === false && chapter.excludeFromToc === false) {
                 return `
 				<li class="table-of-contents">
-                    <a href="./${chapter.filename}">${chapter.title ||
+                    <a href="./${chapter.filename}">${encodeXML(chapter.title) ||
                     'Chapter ' + (1 + index)}</a>${
                     chapter.authors.length
-                        ? `<br/><small class="toc-author">${chapter.authors.join(', ')}</small>`
+                        ? `<br/><small class="toc-author">${encodeXML(
+                              chapter.authors.join(', ')
+                          )}</small>`
                         : ''
                 }
                 </li>`;

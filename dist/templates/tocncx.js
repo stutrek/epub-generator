@@ -35,13 +35,14 @@ function tocNcxTemplate(config, chapters) {
                 </navPoint>`;
         }
     })}
-
-        <navPoint id="toc" playOrder="${playOrder++}" class="chapter">
+        ${config.useToc
+        ? `<navPoint id="toc" playOrder="${playOrder++}" class="chapter">
             <navLabel>
                 <text>Table of Contents</text>
             </navLabel>
             <content src="./toc.xhtml"/>
-        </navPoint>
+        </navPoint>`
+        : ''}
 		${chapters.map((chapter, index) => {
         if (chapter.beforeToc === false && chapter.excludeFromToc === false) {
             return `

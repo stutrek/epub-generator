@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const entities_1 = require("entities");
 function tocHtmlTemplate(options, chapters) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -17,9 +18,9 @@ function tocHtmlTemplate(options, chapters) {
         if (chapter.beforeToc && chapter.excludeFromToc === false) {
             return `
 				<li class="table-of-contents">
-                    <a href="./${chapter.filename}">${chapter.title ||
+                    <a href="./${chapter.filename}">${entities_1.encodeXML(chapter.title) ||
                 'Chapter ' + (1 + index)}</a>${chapter.authors.length
-                ? `<br/><small class="toc-author">${chapter.authors.join(', ')}</small>`
+                ? `<br/><small class="toc-author">${entities_1.encodeXML(chapter.authors.join(', '))}</small>`
                 : ''}
                 </li>`;
         }
@@ -28,9 +29,9 @@ function tocHtmlTemplate(options, chapters) {
         if (chapter.beforeToc === false && chapter.excludeFromToc === false) {
             return `
 				<li class="table-of-contents">
-                    <a href="./${chapter.filename}">${chapter.title ||
+                    <a href="./${chapter.filename}">${entities_1.encodeXML(chapter.title) ||
                 'Chapter ' + (1 + index)}</a>${chapter.authors.length
-                ? `<br/><small class="toc-author">${chapter.authors.join(', ')}</small>`
+                ? `<br/><small class="toc-author">${entities_1.encodeXML(chapter.authors.join(', '))}</small>`
                 : ''}
                 </li>`;
         }

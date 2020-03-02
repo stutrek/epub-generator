@@ -18,9 +18,14 @@ export default function tocHtmlTemplate(
 		<body>
 			${injectTitle ? `<h1>${encodeXML(chapter.title)}</h1>` : ''}
 			${injectAuthor ? `<div class="epub-author">${encodeXML(chapter.authors.join(', '))}</div>` : ''}
-			${injectLink ? `<div class="epub-link"><a href="${chapter.url}">View on web</a></div>` : ''}
+			${
+                injectLink
+                    ? `<div class="epub-link"><a href="${encodeXML(
+                          chapter.url
+                      )}">View on web</a></div>`
+                    : ''
+            }
 			${chapter.data}
 		</body>
-		</html>
-		`;
+		</html>`;
 }

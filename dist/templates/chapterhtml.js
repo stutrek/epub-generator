@@ -14,11 +14,12 @@ function tocHtmlTemplate(chapter, options, docHeader) {
 		<body>
 			${injectTitle ? `<h1>${entities_1.encodeXML(chapter.title)}</h1>` : ''}
 			${injectAuthor ? `<div class="epub-author">${entities_1.encodeXML(chapter.authors.join(', '))}</div>` : ''}
-			${injectLink ? `<div class="epub-link"><a href="${chapter.url}">View on web</a></div>` : ''}
+			${injectLink
+        ? `<div class="epub-link"><a href="${entities_1.encodeXML(chapter.url)}">View on web</a></div>`
+        : ''}
 			${chapter.data}
 		</body>
-		</html>
-		`;
+		</html>`;
 }
 exports.default = tocHtmlTemplate;
 //# sourceMappingURL=chapterhtml.js.map

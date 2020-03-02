@@ -81,13 +81,14 @@ async function createEpub(options, loadImages) {
                 }
             }
         }
+        const text = ('outerHTML' in root ? root.outerHTML : root.text) || '';
         return {
             title: content.title,
             filename: `${`${index}`.padStart(3, '0')}_${slug}.xhtml`,
             excludeFromToc: !!content.excludeFromToc,
             beforeToc: content.beforeToc === true,
             authors: content.authors,
-            data: 'outerHTML' in root ? root.outerHTML : root.text,
+            data: text.replace(/&([^;]*)(\s|$)/g, '&amp;$1$2'),
             url: content.url,
         };
     });
@@ -97,7 +98,9 @@ async function createEpub(options, loadImages) {
     files.set('/OEBPS/style.css', stylescss_1.default);
     files.set('/OEBPS/content.opf', contentopf_1.default(options, resolvedChapters, images));
     files.set('/OEBPS/toc.ncx', tocncx_1.default(options, resolvedChapters));
-    files.set('/OEBPS/toc.xhtml', tochtml_1.default(options, resolvedChapters));
+    if (options.useToc !== false) {
+        files.set('/OEBPS/toc.xhtml', tochtml_1.default(options, resolvedChapters));
+    }
     resolvedChapters.forEach(chapter => {
         files.set('/OEBPS/' + chapter.filename, chapterhtml_1.default(chapter, options, getHeader(options.version, options.lang)));
     });

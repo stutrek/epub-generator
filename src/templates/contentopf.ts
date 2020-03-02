@@ -79,7 +79,7 @@ export default function contentOpfTemplate(
                 return `<itemref idref="content_${index}"/>`;
             }
         })}
-        <itemref idref="toc" />
+        ${options.useToc ? `<itemref idref="toc" />` : ''}
 		${chapters.map((chapter, index) => {
             if (chapter.beforeToc === false) {
                 return `<itemref idref="content_${index}"/>`;

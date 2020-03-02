@@ -7,7 +7,8 @@ exports.default = `
     
     p {
 		margin: 1em 0 0 0;
-		line-height: 1.5;
+        line-height: 1.5;
+        hyphens: auto;
     }
     p + p {
         text-indent: 1em;
