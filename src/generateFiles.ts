@@ -1,4 +1,4 @@
-import { parse, TextNode, HTMLElement } from 'node-html-parser';
+import { JSDOM } from 'jsdom';
 
 import { remove as removeDiacritics } from 'diacritics';
 
@@ -40,85 +40,62 @@ export default async function createEpub(options: EPubOptions, loadImages: Image
     const resolvedChapters: ResolvedChapter[] = options.content.map(function(content, index) {
         const slug = removeDiacritics(content.title || 'no title').replace(/\W/g, '-');
 
-        const unAmpersandedHtml = content.data.replace(/&([^;]*)(\s|$)/g, '&amp;$1$2');
+        const document = new JSDOM(content.data).window.document;
 
-        let root:
-            | (TextNode & {
-                  valid: boolean;
-              })
-            | (
-                  | (HTMLElement & {
-                        valid: boolean;
-                    })
-                  | HTMLElement
-              ) = parse(unAmpersandedHtml, {
-            lowerCaseTagName: true,
-        });
+        const elements = Array.from(document.body.querySelectorAll('*'));
 
-        const elements: HTMLElement[] = [];
-        const fillElements = (parent: HTMLElement) => {
-            parent.childNodes.forEach(node => {
-                if (node instanceof HTMLElement) {
-                    elements.push(node);
-                    fillElements(node);
-                }
-            });
-        };
-
-        if (root instanceof HTMLElement) {
-            if (root.querySelector('body')) {
-                root = root.querySelector('body');
-                root.tagName = 'div';
+        for (const element of elements) {
+            if (
+                element.tagName === 'iframe' ||
+                (element.hasAttribute('width') && Number(element.getAttribute('width')) < 5)
+            ) {
+                element.parentNode.removeChild(element);
+                continue;
             }
-            fillElements(root);
 
-            for (const element of elements) {
-                if (
-                    element.tagName === 'iframe' ||
-                    (element.hasAttribute('width') && Number(element.getAttribute('width')) < 5)
-                ) {
-                    const remover = element.parentNode || root;
-                    // @ts-ignore it does exist
-                    remover.removeChild(element);
-                    continue;
-                }
-
-                if (element.tagName === 'img') {
-                    const image = element;
-                    let url = image.getAttribute('src');
-                    if (url.startsWith('http')) {
-                        if (images.has(url) === false) {
-                            const extension = url
-                                .replace(/[?#].*/, '')
-                                .split('.')
-                                .pop();
-                            images.set(url, `image_${imageCount}.${extension}`);
-                            imageCount += 1;
-                        }
-                        image.setAttribute('src', `./images/${images.get(url)}`);
-
-                        if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
-                            image.setAttribute('alt', 'alt');
-                        }
-
-                        image.removeAttribute('srcset');
+            if (element.tagName === 'img') {
+                const image = element;
+                let url = image.getAttribute('src');
+                if (url.startsWith('http')) {
+                    if (images.has(url) === false) {
+                        const extension = url
+                            .replace(/[?#].*/, '')
+                            .split('.')
+                            .pop();
+                        images.set(url, `image_${imageCount}.${extension}`);
+                        imageCount += 1;
                     }
-                }
+                    image.setAttribute('src', `./images/${images.get(url)}`);
 
-                for (const attr in element.attributes) {
+                    if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
+                        image.setAttribute('alt', 'alt');
+                    }
+
+                    image.removeAttribute('srcset');
+                }
+            }
+            if (element.hasAttributes()) {
+                var attrs = Array.from(element.attributes);
+                for (var i = attrs.length - 1; i >= 0; i--) {
                     if (
-                        allowedAttributes.has(attr) === false ||
-                        (attr === 'src' && element.tagName !== 'img')
+                        allowedAttributes.has(attrs[i].name) === false ||
+                        (attrs[i].name === 'src' && element.tagName !== 'img')
                     ) {
-                        element.removeAttribute(attr);
+                        element.removeAttribute(attrs[i].name);
                     }
                 }
-                if (options.version === 2 && allowedXhtml11Tags.has(element.tagName) === false) {
-                    element.tagName = 'div';
+            }
+            for (const attr of Array.from(element.attributes)) {
+            }
+            if (options.version === 2 && allowedXhtml11Tags.has(element.tagName) === false) {
+                const newElement = document.createElement('div');
+                for (const childNode of Array.from(element.childNodes)) {
+                    newElement.appendChild(childNode);
                 }
+                element.parentNode.replaceChild(newElement, element);
             }
         }
-        const text = ('outerHTML' in root ? root.outerHTML : root.text) || '';
+        const text = document.body.innerHTML;
 
         return {
             title: content.title,

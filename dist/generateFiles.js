@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_html_parser_1 = require("node-html-parser");
+const jsdom_1 = require("jsdom");
 const diacritics_1 = require("diacritics");
 const allowedAttributesAndTags_1 = require("./allowedAttributesAndTags");
 const stylescss_1 = __importDefault(require("./templates/stylescss"));
@@ -35,63 +35,53 @@ async function createEpub(options, loadImages) {
     }
     const resolvedChapters = options.content.map(function (content, index) {
         const slug = diacritics_1.remove(content.title || 'no title').replace(/\W/g, '-');
-        const unAmpersandedHtml = content.data.replace(/&([^;]*)(\s|$)/g, '&amp;$1$2');
-        let root = node_html_parser_1.parse(unAmpersandedHtml, {
-            lowerCaseTagName: true,
-        });
-        const elements = [];
-        const fillElements = (parent) => {
-            parent.childNodes.forEach(node => {
-                if (node instanceof node_html_parser_1.HTMLElement) {
-                    elements.push(node);
-                    fillElements(node);
-                }
-            });
-        };
-        if (root instanceof node_html_parser_1.HTMLElement) {
-            if (root.querySelector('body')) {
-                root = root.querySelector('body');
-                root.tagName = 'div';
+        const document = new jsdom_1.JSDOM(content.data).window.document;
+        const elements = Array.from(document.body.querySelectorAll('*'));
+        for (const element of elements) {
+            if (element.tagName === 'iframe' ||
+                (element.hasAttribute('width') && Number(element.getAttribute('width')) < 5)) {
+                element.parentNode.removeChild(element);
+                continue;
             }
-            fillElements(root);
-            for (const element of elements) {
-                if (element.tagName === 'iframe' ||
-                    (element.hasAttribute('width') && Number(element.getAttribute('width')) < 5)) {
-                    const remover = element.parentNode || root;
-                    remover.removeChild(element);
-                    continue;
+            if (element.tagName === 'img') {
+                const image = element;
+                let url = image.getAttribute('src');
+                if (url.startsWith('http')) {
+                    if (images.has(url) === false) {
+                        const extension = url
+                            .replace(/[?#].*/, '')
+                            .split('.')
+                            .pop();
+                        images.set(url, `image_${imageCount}.${extension}`);
+                        imageCount += 1;
+                    }
+                    image.setAttribute('src', `./images/${images.get(url)}`);
+                    if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
+                        image.setAttribute('alt', 'alt');
+                    }
+                    image.removeAttribute('srcset');
                 }
-                if (element.tagName === 'img') {
-                    const image = element;
-                    let url = image.getAttribute('src');
-                    if (url.startsWith('http')) {
-                        if (images.has(url) === false) {
-                            const extension = url
-                                .replace(/[?#].*/, '')
-                                .split('.')
-                                .pop();
-                            images.set(url, `image_${imageCount}.${extension}`);
-                            imageCount += 1;
-                        }
-                        image.setAttribute('src', `./images/${images.get(url)}`);
-                        if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
-                            image.setAttribute('alt', 'alt');
-                        }
-                        image.removeAttribute('srcset');
+            }
+            if (element.hasAttributes()) {
+                var attrs = Array.from(element.attributes);
+                for (var i = attrs.length - 1; i >= 0; i--) {
+                    if (allowedAttributesAndTags_1.allowedAttributes.has(attrs[i].name) === false ||
+                        (attrs[i].name === 'src' && element.tagName !== 'img')) {
+                        element.removeAttribute(attrs[i].name);
                     }
                 }
-                for (const attr in element.attributes) {
-                    if (allowedAttributesAndTags_1.allowedAttributes.has(attr) === false ||
-                        (attr === 'src' && element.tagName !== 'img')) {
-                        element.removeAttribute(attr);
-                    }
+            }
+            for (const attr of Array.from(element.attributes)) {
+            }
+            if (options.version === 2 && allowedAttributesAndTags_1.allowedXhtml11Tags.has(element.tagName) === false) {
+                const newElement = document.createElement('div');
+                for (const childNode of Array.from(element.childNodes)) {
+                    newElement.appendChild(childNode);
                 }
-                if (options.version === 2 && allowedAttributesAndTags_1.allowedXhtml11Tags.has(element.tagName) === false) {
-                    element.tagName = 'div';
-                }
+                element.parentNode.replaceChild(newElement, element);
             }
         }
-        const text = ('outerHTML' in root ? root.outerHTML : root.text) || '';
+        const text = document.body.innerHTML;
         return {
             title: content.title,
             filename: `${`${index}`.padStart(3, '0')}_${slug}.xhtml`,
