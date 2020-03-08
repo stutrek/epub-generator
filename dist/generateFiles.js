@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const jsdom_1 = require("jsdom");
+const sanitize_html_1 = __importDefault(require("sanitize-html"));
 const diacritics_1 = require("diacritics");
 const allowedAttributesAndTags_1 = require("./allowedAttributesAndTags");
 const stylescss_1 = __importDefault(require("./templates/stylescss"));
@@ -35,60 +35,61 @@ async function createEpub(options, loadImages) {
     }
     const resolvedChapters = options.content.map(function (content, index) {
         const slug = diacritics_1.remove(content.title || 'no title').replace(/\W/g, '-');
-        const document = new jsdom_1.JSDOM(content.data).window.document;
-        const elements = Array.from(document.body.querySelectorAll('*'));
-        for (const element of elements) {
-            if (element.tagName === 'iframe' ||
-                (element.hasAttribute('width') && Number(element.getAttribute('width')) < 5)) {
-                element.parentNode.removeChild(element);
-                continue;
-            }
-            if (element.tagName === 'img') {
-                const image = element;
-                let url = image.getAttribute('src');
-                if (url.startsWith('http')) {
-                    if (images.has(url) === false) {
-                        const extension = url
-                            .replace(/[?#].*/, '')
-                            .split('.')
-                            .pop();
-                        images.set(url, `image_${imageCount}.${extension}`);
-                        imageCount += 1;
-                    }
-                    image.setAttribute('src', `./images/${images.get(url)}`);
-                    if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
-                        image.setAttribute('alt', 'alt');
-                    }
-                    image.removeAttribute('srcset');
+        const sanitizeConfig = {
+            allowedAttributes: {
+                '*': allowedAttributesAndTags_1.allowedAttributes,
+                img: ['src', ...allowedAttributesAndTags_1.allowedAttributes],
+            },
+            allowedTags: allowedAttributesAndTags_1.allowedXhtml11Tags,
+            exclusiveFilter: frame => {
+                if (frame.tag === 'iframe') {
+                    return true;
                 }
-            }
-            if (element.hasAttributes()) {
-                var attrs = Array.from(element.attributes);
-                for (var i = attrs.length - 1; i >= 0; i--) {
-                    if (allowedAttributesAndTags_1.allowedAttributes.has(attrs[i].name) === false ||
-                        (attrs[i].name === 'src' && element.tagName !== 'img')) {
-                        element.removeAttribute(attrs[i].name);
+                if (frame.tag === 'img') {
+                    if ('width' in frame.attribs) {
+                        return Number(frame.attribs.width) > 60;
                     }
                 }
-            }
-            for (const attr of Array.from(element.attributes)) {
-            }
-            if (options.version === 2 && allowedAttributesAndTags_1.allowedXhtml11Tags.has(element.tagName) === false) {
-                const newElement = document.createElement('div');
-                for (const childNode of Array.from(element.childNodes)) {
-                    newElement.appendChild(childNode);
-                }
-                element.parentNode.replaceChild(newElement, element);
-            }
-        }
-        const text = document.body.innerHTML;
+                return false;
+            },
+            transformTags: {
+                img: (tagName, attribs) => {
+                    const url = attribs.src;
+                    if ('width' in attribs && Number(attribs.width) < 60) {
+                        return {
+                            tagName: 'span',
+                            attribs: {},
+                        };
+                    }
+                    if (url.startsWith('http')) {
+                        if (images.has(url) === false) {
+                            const extension = url
+                                .replace(/[?#].*/, '')
+                                .split('.')
+                                .pop();
+                            images.set(url, `image_${imageCount}.${extension}`);
+                            imageCount += 1;
+                        }
+                        attribs.src = `./images/${images.get(url)}`;
+                        if (!attribs.alt) {
+                            attribs.alt = ' ';
+                        }
+                    }
+                    return {
+                        tagName,
+                        attribs,
+                    };
+                },
+            },
+        };
+        const cleanHtml = sanitize_html_1.default(`<div>${content.data.trim()}</div>`, sanitizeConfig);
         return {
             title: content.title,
             filename: `${`${index}`.padStart(3, '0')}_${slug}.xhtml`,
             excludeFromToc: !!content.excludeFromToc,
             beforeToc: content.beforeToc === true,
             authors: content.authors,
-            data: text.replace(/&([^;]*)(\s|$)/g, '&amp;$1$2'),
+            data: cleanHtml,
             url: content.url,
         };
     });

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allowedAttributes = new Set([
+exports.allowedAttributes = [
     'content',
     'alt',
     'id',
@@ -140,8 +140,8 @@ exports.allowedAttributes = new Set([
     'rowspan',
     'epub:type',
     'epub:prefix',
-]);
-exports.allowedXhtml11Tags = new Set([
+];
+exports.allowedXhtml11Tags = [
     'div',
     'p',
     'h1',
@@ -215,5 +215,5 @@ exports.allowedXhtml11Tags = new Set([
     'table',
     'tt',
     'var',
-]);
+];
 //# sourceMappingURL=allowedAttributesAndTags.js.map

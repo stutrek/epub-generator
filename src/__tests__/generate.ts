@@ -19,10 +19,7 @@ export async function generateEpubs() {
     // );
     // console.log('loaded');
 
-    const feeds = await Promise.all([
-        // parse(testFeed),
-        parse(testRss),
-    ]);
+    const feeds = await Promise.all([parse(testFeed), parse(testRss)]);
 
     const promises: Promise<any>[] = [];
     for (const feed of feeds) {

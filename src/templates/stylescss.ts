@@ -1,11 +1,11 @@
 export default /*css*/ `
     html, body {
         margin: 0;
+        line-height: 1.5;
     }
     
-    p {
+    p, ul, ol {
 		margin: 1em 0 0 0;
-        line-height: 1.5;
         hyphens: auto;
     }
     p + p {
@@ -13,17 +13,17 @@ export default /*css*/ `
         margin: 0;
 	}
 	img {
-		margin: 1em auto;
+		margin: 1em auto 0;
         display: block;
         width: 100%;
 	}
 
-    .gallery, figure {
-        margin: 1em 0;
+    .gallery, figure, .caption, .attribution {
         padding: 0;
         display: block;
         list-style-type: none;
         font-size: 85%;
+        line-height: 1.3;
     }
     .gallery > * {
         display: block;

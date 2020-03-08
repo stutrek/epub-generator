@@ -1,4 +1,4 @@
-export const allowedAttributes = new Set([
+export const allowedAttributes = [
     'content',
     'alt',
     'id',
@@ -138,9 +138,9 @@ export const allowedAttributes = new Set([
     'rowspan',
     'epub:type',
     'epub:prefix',
-]);
+];
 
-export const allowedXhtml11Tags = new Set([
+export const allowedXhtml11Tags = [
     'div',
     'p',
     'h1',
@@ -214,4 +214,4 @@ export const allowedXhtml11Tags = new Set([
     'table',
     'tt',
     'var',
-]);
+];

@@ -1,5 +1,4 @@
-import { JSDOM } from 'jsdom';
-
+import sanitizeHtml from 'sanitize-html';
 import { remove as removeDiacritics } from 'diacritics';
 
 import { allowedAttributes, allowedXhtml11Tags } from './allowedAttributesAndTags';
@@ -40,62 +39,55 @@ export default async function createEpub(options: EPubOptions, loadImages: Image
     const resolvedChapters: ResolvedChapter[] = options.content.map(function(content, index) {
         const slug = removeDiacritics(content.title || 'no title').replace(/\W/g, '-');
 
-        const document = new JSDOM(content.data).window.document;
-
-        const elements = Array.from(document.body.querySelectorAll('*'));
-
-        for (const element of elements) {
-            if (
-                element.tagName === 'iframe' ||
-                (element.hasAttribute('width') && Number(element.getAttribute('width')) < 5)
-            ) {
-                element.parentNode.removeChild(element);
-                continue;
-            }
-
-            if (element.tagName === 'img') {
-                const image = element;
-                let url = image.getAttribute('src');
-                if (url.startsWith('http')) {
-                    if (images.has(url) === false) {
-                        const extension = url
-                            .replace(/[?#].*/, '')
-                            .split('.')
-                            .pop();
-                        images.set(url, `image_${imageCount}.${extension}`);
-                        imageCount += 1;
-                    }
-                    image.setAttribute('src', `./images/${images.get(url)}`);
-
-                    if (image.hasAttribute('alt') === false || !image.getAttribute('alt')) {
-                        image.setAttribute('alt', 'alt');
-                    }
-
-                    image.removeAttribute('srcset');
+        const sanitizeConfig: sanitizeHtml.IOptions = {
+            allowedAttributes: {
+                '*': allowedAttributes,
+                img: ['src', ...allowedAttributes],
+            },
+            allowedTags: allowedXhtml11Tags,
+            exclusiveFilter: frame => {
+                if (frame.tag === 'iframe') {
+                    return true;
                 }
-            }
-            if (element.hasAttributes()) {
-                var attrs = Array.from(element.attributes);
-                for (var i = attrs.length - 1; i >= 0; i--) {
-                    if (
-                        allowedAttributes.has(attrs[i].name) === false ||
-                        (attrs[i].name === 'src' && element.tagName !== 'img')
-                    ) {
-                        element.removeAttribute(attrs[i].name);
+                if (frame.tag === 'img') {
+                    if ('width' in frame.attribs) {
+                        return Number(frame.attribs.width) > 60;
                     }
                 }
-            }
-            for (const attr of Array.from(element.attributes)) {
-            }
-            if (options.version === 2 && allowedXhtml11Tags.has(element.tagName) === false) {
-                const newElement = document.createElement('div');
-                for (const childNode of Array.from(element.childNodes)) {
-                    newElement.appendChild(childNode);
-                }
-                element.parentNode.replaceChild(newElement, element);
-            }
-        }
-        const text = document.body.innerHTML;
+                return false;
+            },
+            transformTags: {
+                img: (tagName, attribs) => {
+                    const url = attribs.src;
+                    if ('width' in attribs && Number(attribs.width) < 60) {
+                        return {
+                            tagName: 'span',
+                            attribs: {},
+                        };
+                    }
+                    if (url.startsWith('http')) {
+                        if (images.has(url) === false) {
+                            const extension = url
+                                .replace(/[?#].*/, '')
+                                .split('.')
+                                .pop();
+                            images.set(url, `image_${imageCount}.${extension}`);
+                            imageCount += 1;
+                        }
+                        attribs.src = `./images/${images.get(url)}`;
+
+                        if (!attribs.alt) {
+                            attribs.alt = ' ';
+                        }
+                    }
+                    return {
+                        tagName,
+                        attribs,
+                    };
+                },
+            },
+        };
+        const cleanHtml = sanitizeHtml(`<div>${content.data.trim()}</div>`, sanitizeConfig);
 
         return {
             title: content.title,
@@ -103,7 +95,7 @@ export default async function createEpub(options: EPubOptions, loadImages: Image
             excludeFromToc: !!content.excludeFromToc,
             beforeToc: content.beforeToc === true,
             authors: content.authors,
-            data: text.replace(/&([^;]*)(\s|$)/g, '&amp;$1$2'),
+            data: cleanHtml,
             url: content.url,
         };
     });

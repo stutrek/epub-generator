@@ -1,2 +1,2 @@
-export declare const allowedAttributes: Set<string>;
-export declare const allowedXhtml11Tags: Set<string>;
+export declare const allowedAttributes: string[];
+export declare const allowedXhtml11Tags: string[];
