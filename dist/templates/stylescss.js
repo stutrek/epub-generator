@@ -5,6 +5,10 @@ exports.default = `
         margin: 0;
         line-height: 1.5;
     }
+
+    h1, h2, h3, h4, h5, h6 {
+        line-height: 1.2
+    }
     
     p, ul, ol {
 		margin: 1em 0 0 0;
