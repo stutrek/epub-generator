@@ -75,10 +75,9 @@ function contentOpfTemplate(options, chapters, images) {
     </spine>
     ${options.useToc
         ? `
-    <guide>
-        <reference type="text" title="Table of Content" href="toc.xhtml"/>
-    </guide>
-    `
+            <guide>
+                <reference type="text" title="Table of Content" href="toc.xhtml"/>
+            </guide>`
         : ``}
 </package>`;
 }
