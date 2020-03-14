@@ -62,7 +62,11 @@ export default function contentOpfTemplate(
 
     <manifest>
         <item id="ncx" href="./toc.ncx" media-type="application/x-dtbncx+xml" />
-        <item id="toc" href="./toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+        ${
+            options.useToc
+                ? `<item id="toc" href="./toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>`
+                : ``
+        }
 		<item id="css" href="./style.css" media-type="text/css" />
 		${Array.from(images.values()).map(
             filename =>
@@ -90,8 +94,14 @@ export default function contentOpfTemplate(
             }
         })}
     </spine>
+    ${
+        options.useToc
+            ? `
     <guide>
         <reference type="text" title="Table of Content" href="toc.xhtml"/>
     </guide>
+    `
+            : ``
+    }
 </package>`;
 }

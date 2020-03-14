@@ -52,7 +52,9 @@ function contentOpfTemplate(options, chapters, images) {
 
     <manifest>
         <item id="ncx" href="./toc.ncx" media-type="application/x-dtbncx+xml" />
-        <item id="toc" href="./toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+        ${options.useToc
+        ? `<item id="toc" href="./toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>`
+        : ``}
 		<item id="css" href="./style.css" media-type="text/css" />
 		${Array.from(images.values()).map(filename => `<item href="./images/${filename}" id="${filename.replace(/\W/g, '_')}" media-type="${imageMime(filename)}" />`)}
 		${chapters.map((chapter, index) => `<item id="content_${index}" href="./${chapter.filename}" media-type="application/xhtml+xml" />`)}
@@ -71,9 +73,13 @@ function contentOpfTemplate(options, chapters, images) {
         }
     })}
     </spine>
+    ${options.useToc
+        ? `
     <guide>
         <reference type="text" title="Table of Content" href="toc.xhtml"/>
     </guide>
+    `
+        : ``}
 </package>`;
 }
 exports.default = contentOpfTemplate;
