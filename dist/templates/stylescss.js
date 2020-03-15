@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = `
     html, body {
         margin: 0;
+        padding: 0;
         line-height: 1.5;
     }
 
